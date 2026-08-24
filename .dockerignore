@@ -1,0 +1,14 @@
+.git
+.github
+**/.venv
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+**/.env
+frontend/node_modules
+frontend/dist
+frontend/*.tsbuildinfo
+backend/data
+data
+neo4j/import/*.csv
+**/.DS_Store

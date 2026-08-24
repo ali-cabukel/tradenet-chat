@@ -23,6 +23,7 @@ pydantic-settings = "^2.9.0"
 python-multipart = "^0.0.20"
 sqlalchemy = "^2.0.40"
 uvicorn = { extras = ["standard"], version = "^0.34.0" }
+asyncpg = "^0.31.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0.3"

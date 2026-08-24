@@ -24,8 +24,13 @@ def get_engine() -> AsyncEngine:
     global _engine
     if _engine is None:
         settings = get_settings()
-        settings.resolved_db_path.parent.mkdir(parents=True, exist_ok=True)
-        _engine = create_async_engine(settings.database_url, echo=False)
+        url = settings.database_url
+        kwargs: dict = {"echo": False}
+        if settings.is_sqlite:
+            settings.resolved_db_path.parent.mkdir(parents=True, exist_ok=True)
+        else:
+            kwargs["pool_pre_ping"] = True
+        _engine = create_async_engine(url, **kwargs)
     return _engine
 
 
@@ -37,10 +42,10 @@ def get_session_maker() -> async_sessionmaker[AsyncSession]:
 
 
 def ensure_chat_message_columns(connection: Connection) -> None:
-    """Add feedback/regenerate columns on existing SQLite databases.
+    """Add feedback/regenerate columns on existing databases.
 
-    ``create_all`` does not alter tables, so a running SQLite file would otherwise
-    keep the original ``chat_messages`` shape.
+    ``create_all`` does not alter tables, so a running SQLite or Postgres database
+    would otherwise keep the original ``chat_messages`` shape.
     """
     inspector = inspect(connection)
     if "chat_messages" not in inspector.get_table_names():
@@ -59,7 +64,8 @@ def ensure_chat_message_columns(connection: Connection) -> None:
     if "regenerated_at" not in existing:
         additions.append(f"regenerated_at {timestamp_type}")
     if "queries" not in existing:
-        additions.append("queries JSON")
+        query_type = "JSONB" if connection.dialect.name == "postgresql" else "JSON"
+        additions.append(f"queries {query_type}")
     for column_def in additions:
         connection.execute(text(f"ALTER TABLE chat_messages ADD COLUMN {column_def}"))
 

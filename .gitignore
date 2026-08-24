@@ -223,4 +223,5 @@ frontend/dist/
 *.tsbuildinfo
 backend/data/
 data/
+neo4j/import/*.csv
 .DS_Store
