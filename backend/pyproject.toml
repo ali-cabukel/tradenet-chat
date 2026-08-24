@@ -1,0 +1,59 @@
+[tool.poetry]
+name = "tradenet-chat"
+version = "0.1.0"
+description = "Conversational agent that generates Cypher queries for Neo4j"
+authors = ["Ali Cabukel"]
+readme = "../README.md"
+packages = [{ include = "tradenet_chat", from = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+aiosqlite = "^0.21.0"
+fastapi = "^0.115.0"
+fastapi-users = { extras = ["sqlalchemy"], version = "^14.0.1" }
+httpx = "^0.28.1"
+ddgs = "^9.0.0"
+langchain-core = "^1.4.0"
+langchain-ollama = "^1.0.0"
+langchain-openai = "^1.0.0"
+langgraph = "^1.2.0"
+neo4j = "^5.28.0"
+pydantic = "^2.11.0"
+pydantic-settings = "^2.9.0"
+python-multipart = "^0.0.20"
+sqlalchemy = "^2.0.40"
+uvicorn = { extras = ["standard"], version = "^0.34.0" }
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^9.0.3"
+pytest-asyncio = "^1.0.0"
+ruff = "^0.15.15"
+
+[tool.poetry.scripts]
+tradenet-chat-api = "tradenet_chat.server:run"
+
+[build-system]
+requires = ["poetry-core>=2.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "UP", "B", "SIM"]
+ignore = ["B008"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["tradenet_chat"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
