@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import JSON, DateTime, ForeignKey, Index, Integer, String, Text, Uuid, func
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -56,6 +57,8 @@ class ChatMessage(Base):
         Integer, nullable=False, default=0, server_default="0"
     )
     regenerated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
-    queries: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    queries: Mapped[list[str] | None] = mapped_column(
+        JSON().with_variant(JSONB(), "postgresql"), nullable=True
+    )
 
     thread: Mapped[ChatThread] = relationship(back_populates="messages")

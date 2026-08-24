@@ -12,6 +12,18 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
+def async_database_url(url: str) -> str:
+    """Normalize a database URL to an async SQLAlchemy driver."""
+    value = url.strip()
+    if value.startswith("postgres://"):
+        return "postgresql+asyncpg://" + value.removeprefix("postgres://")
+    if value.startswith("postgresql://") and not value.startswith("postgresql+"):
+        return "postgresql+asyncpg://" + value.removeprefix("postgresql://")
+    if value.startswith("sqlite://") and not value.startswith("sqlite+"):
+        return "sqlite+aiosqlite://" + value.removeprefix("sqlite://")
+    return value
+
+
 class AppEnvironment(StrEnum):
     DEVELOPMENT = "development"
     PRODUCTION = "production"
@@ -41,7 +53,10 @@ class Settings(BaseSettings):
     database_url_override: str | None = Field(default=None, validation_alias="DATABASE_URL")
 
     cors_origins_raw: str = Field(
-        default="http://localhost:5173,http://127.0.0.1:5173",
+        default=(
+            "http://localhost:5173,http://127.0.0.1:5173,"
+            "http://localhost:8080,http://127.0.0.1:8080"
+        ),
         validation_alias="CORS_ORIGINS",
     )
 
@@ -89,8 +104,17 @@ class Settings(BaseSettings):
     @property
     def database_url(self) -> str:
         if self.database_url_override:
-            return self.database_url_override
+            return async_database_url(self.database_url_override)
         return f"sqlite+aiosqlite:///{self.resolved_db_path}"
+
+    @property
+    def is_postgres(self) -> bool:
+        scheme = self.database_url.split(":", 1)[0]
+        return "postgres" in scheme
+
+    @property
+    def is_sqlite(self) -> bool:
+        return self.database_url.startswith("sqlite")
 
     @property
     def should_reload(self) -> bool:
