@@ -216,3 +216,11 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# App
+frontend/node_modules/
+frontend/dist/
+*.tsbuildinfo
+backend/data/
+data/
+.DS_Store
